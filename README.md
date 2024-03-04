@@ -22,12 +22,12 @@ docker run -p 8080:8080 lucasg04/prometheus-nodejs-app:latest
 
 The application exposes the following endpoints:
 
-- `GET /counter`: Creates a counter metric
-  - Query Params: `name` (Metric Name), `help`, `severity`
-- `GET /gauge`: Creates a gauge metric
-  - Query Params: `name` (Metric Name), `help`, `severity`
-- `GET /histogram`: Creates a histogram metric
-  - Query Params: `name` (Metric Name), `help`, `severity`
-- `GET /summary`: Creates a summary metric
-  - Query Params: `name` (Metric Name), `help`, `severity`
+- `POST /counter`: Creates a counter metric
+  - Body Params: `name`, `help`, `labels`
+- `POST /gauge`: Creates a gauge metric
+  - Body Params: `name`, `help`, `labels`
+- `POST /histogram`: Creates a histogram metric
+  - Body Params: `name`, `help`, `labels`
+- `POST /summary`: Creates a summary metric
+  - Body Params: `name`, `help`, `labels`
 - `GET /metrics:` Exposes Prometheus metrics

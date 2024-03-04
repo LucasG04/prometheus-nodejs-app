@@ -6,70 +6,110 @@ const port = 8080;
 
 app.use(express.json());
 
-app.get('/counter', (req, res) => {
-    const { name, help, severity } = req.query;
-    
+const labelsAreValid = (labels) => {
+    for (const label of labels) {
+        if (!label || !label.name || !label.value || typeof label.name !== 'string' || typeof label.value !== 'string') {
+            return false;
+        }
+    }
+    return true;
+}
+
+const createMetric = (type, name, help, labels, value) => {
+    const labelNames = labels ? labels.map(l => l.name) : [];
+    const labelValues = labels ? labels.map(l => l.value) : [];
+    if (type === 'counter') {
+        const counter = new prometheus.Counter({
+            name: name,
+            help: help || 'Help empty',
+            labelNames
+        });
+        counter.labels(...labelValues).inc(value || 1);
+    } else if (type === 'gauge') {
+        const gauge = new prometheus.Gauge({
+            name: name,
+            help: help || 'Help empty',
+            labelNames
+        });
+        gauge.labels(...labelValues).set(value || 0);
+    } else if (type === 'histogram') {
+        const histogram = new prometheus.Histogram({
+            name: name,
+            help: help || 'Help empty',
+            labelNames,
+            buckets: [0.1, 1, 5, 10]
+        });
+        histogram.labels(...labelValues).observe(value || 0);
+    } else if (type === 'summary') {
+        const summary = new prometheus.Summary({
+            name: name,
+            help: help || 'Help empty',
+            labelNames
+        });
+        summary.labels(...labelValues).observe(value || 0);
+    }
+}
+
+app.post('/counter', (req, res) => {
+    const { name, help, labels, value } = req.body;
+
     if (!name) {
-        res.status(400).send('No "name" passed.')
+        res.status(400).send('No "name" passed.');
+    } else if (labels && !Array.isArray(labels)) {
+        res.status(400).send('Invalid labels format.');
+    } else if (labels && !labelsAreValid(labels)) {
+        res.status(400).send('Invalid labels provided.');
     }
 
-    const counter = new prometheus.Counter({
-        name: name,
-        help: help ?? 'Help empty',
-        labelNames: ['severity']
-    });
-    counter.labels(severity || '0').inc();
+    createMetric('counter', name, help, labels, value);
 
     res.status(200).send('OK');
 });
 
-app.get('/gauge', (req, res) => {
-    const { name, help, value } = req.query;
-    
-    if (!name || !value) {
-        res.status(400).send('Both "name" and "value" are required.');
-        return;
+app.post('/gauge', (req, res) => {
+    const { name, help, labels, value } = req.body;
+
+    if (!name) {
+        res.status(400).send('No "name" passed.');
+    } else if (labels && !Array.isArray(labels)) {
+        res.status(400).send('Invalid labels format.');
+    } else if (labels && !labelsAreValid(labels)) {
+        res.status(400).send('Invalid labels provided.');
     }
 
-    const gauge = new prometheus.Gauge({
-        name: name,
-        help: help || 'Help empty',
-    });
-    gauge.set(parseFloat(value));
+    createMetric('gauge', name, help, labels, value);
 
     res.status(200).send('OK');
 });
 
-app.get('/histogram', (req, res) => {
-    const { name, help, value } = req.query;
-    
-    if (!name || !value) {
-        res.status(400).send('Both "name" and "value" are required.');
-        return;
+app.post('/histogram', (req, res) => {
+    const { name, help, labels, value } = req.body;
+
+    if (!name) {
+        res.status(400).send('No "name" passed.');
+    } else if (labels && !Array.isArray(labels)) {
+        res.status(400).send('Invalid labels format.');
+    } else if (labels && !labelsAreValid(labels)) {
+        res.status(400).send('Invalid labels provided.');
     }
 
-    const histogram = new prometheus.Histogram({
-        name: name,
-        help: help || 'Help empty',
-    });
-    histogram.observe(parseFloat(value));
+    createMetric('histogram', name, help, labels, value);
 
     res.status(200).send('OK');
 });
 
-app.get('/summary', (req, res) => {
-    const { name, help, value } = req.query;
-    
-    if (!name || !value) {
-        res.status(400).send('Both "name" and "value" are required.');
-        return;
+app.post('/summary', (req, res) => {
+    const { name, help, labels, value } = req.body;
+
+    if (!name) {
+        res.status(400).send('No "name" passed.');
+    } else if (labels && !Array.isArray(labels)) {
+        res.status(400).send('Invalid labels format.');
+    } else if (labels && !labelsAreValid(labels)) {
+        res.status(400).send('Invalid labels provided.');
     }
 
-    const summary = new prometheus.Summary({
-        name: name,
-        help: help || 'Help empty',
-    });
-    summary.observe(parseFloat(value));
+    createMetric('summary', name, help, labels, value);
 
     res.status(200).send('OK');
 });
