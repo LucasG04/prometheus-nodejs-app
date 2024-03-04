@@ -79,7 +79,7 @@ app.get('/metrics', (req, res) => {
     res.end(prometheus.register.metrics());
 });
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`App listening at port ${port}`);
 });
-module.exports = app;
+module.exports = server;

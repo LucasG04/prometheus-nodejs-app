@@ -2,6 +2,10 @@ const request = require('supertest');
 const prometheus = require('prom-client');
 const server = require('../app');
 
+afterAll(() => {
+    server.close();
+});
+
 describe('Counter', () => {
     it('increments the counter', async () => {
         const res = await request(server)

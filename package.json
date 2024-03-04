@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "jest --runInBand --ci --coverage"
   },
   "author": "LucasG04",
   "license": "ISC",
