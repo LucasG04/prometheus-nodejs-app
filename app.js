@@ -7,14 +7,14 @@ const port = 8080;
 app.use(express.json());
 
 app.get('/counter', (req, res) => {
-    const { metric_name, help, severity } = req.query;
+    const { name, help, severity } = req.query;
     
-    if (!metric_name) {
-        res.status(400).send('No "metric_name" passed.')
+    if (!name) {
+        res.status(400).send('No "name" passed.')
     }
 
     const counter = new prometheus.Counter({
-        name: metric_name,
+        name: name,
         help: help ?? 'Help empty',
         labelNames: ['severity']
     });
@@ -24,15 +24,15 @@ app.get('/counter', (req, res) => {
 });
 
 app.get('/gauge', (req, res) => {
-    const { metric_name, help, value } = req.query;
+    const { name, help, value } = req.query;
     
-    if (!metric_name || !value) {
-        res.status(400).send('Both "metric_name" and "value" are required.');
+    if (!name || !value) {
+        res.status(400).send('Both "name" and "value" are required.');
         return;
     }
 
     const gauge = new prometheus.Gauge({
-        name: metric_name,
+        name: name,
         help: help || 'Help empty',
     });
     gauge.set(parseFloat(value));
@@ -41,15 +41,15 @@ app.get('/gauge', (req, res) => {
 });
 
 app.get('/histogram', (req, res) => {
-    const { metric_name, help, value } = req.query;
+    const { name, help, value } = req.query;
     
-    if (!metric_name || !value) {
-        res.status(400).send('Both "metric_name" and "value" are required.');
+    if (!name || !value) {
+        res.status(400).send('Both "name" and "value" are required.');
         return;
     }
 
     const histogram = new prometheus.Histogram({
-        name: metric_name,
+        name: name,
         help: help || 'Help empty',
     });
     histogram.observe(parseFloat(value));
@@ -58,15 +58,15 @@ app.get('/histogram', (req, res) => {
 });
 
 app.get('/summary', (req, res) => {
-    const { metric_name, help, value } = req.query;
+    const { name, help, value } = req.query;
     
-    if (!metric_name || !value) {
-        res.status(400).send('Both "metric_name" and "value" are required.');
+    if (!name || !value) {
+        res.status(400).send('Both "name" and "value" are required.');
         return;
     }
 
     const summary = new prometheus.Summary({
-        name: metric_name,
+        name: name,
         help: help || 'Help empty',
     });
     summary.observe(parseFloat(value));
@@ -74,9 +74,9 @@ app.get('/summary', (req, res) => {
     res.status(200).send('OK');
 });
 
-app.get('/metrics', (req, res) => {
+app.get('/metrics', async (req, res) => {
     res.set('Content-Type', prometheus.register.contentType);
-    res.end(prometheus.register.metrics());
+    res.end(await prometheus.register.metrics());
 });
 
 const server = app.listen(port, () => {

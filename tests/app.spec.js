@@ -10,7 +10,7 @@ describe('Counter', () => {
     it('increments the counter', async () => {
         const res = await request(server)
             .get('/counter')
-            .query({ metric_name: 'test_counter', severity: 'high' });
+            .query({ name: 'test_counter', severity: 'high' });
             console.log(res)
         expect(res.status).toBe(200);
 
@@ -19,7 +19,7 @@ describe('Counter', () => {
         expect(metrics).toContain('test_counter{severity="high"} 1');
     });
 
-    it('returns error if no metric_name provided', async () => {
+    it('returns error if no name provided', async () => {
         const res = await request(server)
             .get('/counter');
         expect(res.status).toBe(400);
@@ -30,7 +30,7 @@ describe('Gauge', () => {
     it('sets the gauge value', async () => {
         const res = await request(server)
             .get('/gauge')
-            .query({ metric_name: 'test_gauge', value: 10 });
+            .query({ name: 'test_gauge', value: 10 });
         expect(res.status).toBe(200);
 
         // Verify the gauge was set
@@ -38,7 +38,7 @@ describe('Gauge', () => {
         expect(metrics).toContain('test_gauge 10');
     });
 
-    it('returns error if no metric_name provided', async () => {
+    it('returns error if no name provided', async () => {
         const res = await request(server)
             .get('/gauge');
         expect(res.status).toBe(400);
@@ -49,7 +49,7 @@ describe('Histogram', () => {
     it('observes the histogram value', async () => {
         const res = await request(server)
             .get('/histogram')
-            .query({ metric_name: 'test_histogram', value: 5 });
+            .query({ name: 'test_histogram', value: 5 });
         expect(res.status).toBe(200);
 
         // Verify the histogram was observed
@@ -62,7 +62,7 @@ describe('Histogram', () => {
         expect(metrics).toContain('test_histogram_count 1');
     });
 
-    it('returns error if no metric_name provided', async () => {
+    it('returns error if no name provided', async () => {
         const res = await request(server).get('/histogram');
         expect(res.status).toBe(400);
     });
@@ -72,7 +72,7 @@ describe('Summary', () => {
     it('observes the summary value', async () => {
         const res = await request(server)
             .get('/summary')
-            .query({ metric_name: 'test_summary', value: 7 });
+            .query({ name: 'test_summary', value: 7 });
         expect(res.status).toBe(200);
 
         // Verify the summary was observed
@@ -81,7 +81,7 @@ describe('Summary', () => {
         expect(metrics).toContain('test_summary_count 1');
     });
 
-    it('returns error if no metric_name provided', async () => {
+    it('returns error if no name provided', async () => {
         const res = await request(server)
             .get('/summary');
         expect(res.status).toBe(400);
