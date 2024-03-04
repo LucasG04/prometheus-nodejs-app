@@ -23,13 +23,16 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: LucasG04
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker image
-        run: |
-          docker build -t LucasG04/prometheus-nodejs-app .
-          docker tag LucasG04/prometheus-nodejs-app LucasG04/prometheus-nodejs-app:latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push Docker image to Docker Hub
-        run: docker push LucasG04/prometheus-nodejs-app
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/prometheus-nodejs-app
