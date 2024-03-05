@@ -18,16 +18,32 @@ This Node.js application provides a basic HTTP server that serves a simple "Hell
 docker run -p 8080:8080 lucasg04/prometheus-nodejs-app:latest
 ```
 
+Open a terminal inside of the container and run:
+```console
+$ curl -X POST -H "Content-Type: application/json" --data '{"name":"test_counter","help":"Test counter","labels":[{"name":"app","value":"backend"}]}' localhost:8080/counter
+OK
+
+$ curl localhost:8080/metrics
+# HELP test_counter Test counter
+# TYPE test_counter counter
+test_counter{app="backend"} 1
+```
+
 ## Endpoints
 
 The application exposes the following endpoints:
 
 - `POST /counter`: Creates a counter metric
-  - Body Params: `name`, `help`, `labels`
 - `POST /gauge`: Creates a gauge metric
-  - Body Params: `name`, `help`, `labels`
 - `POST /histogram`: Creates a histogram metric
-  - Body Params: `name`, `help`, `labels`
 - `POST /summary`: Creates a summary metric
-  - Body Params: `name`, `help`, `labels`
 - `GET /metrics:` Exposes Prometheus metrics
+
+Each `POST` endpoint accepts a body with:
+```javascript
+{
+  name: string; // Name of the metric, required
+  help: string; // Help text for the metric
+  labels: { name: string; value: string; }[]; // Labels for the metric
+}
+```
