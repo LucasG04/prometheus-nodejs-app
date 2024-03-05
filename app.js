@@ -19,33 +19,45 @@ const createMetric = (type, name, help, labels, value) => {
     const labelNames = labels ? labels.map(l => l.name) : [];
     const labelValues = labels ? labels.map(l => l.value) : [];
     if (type === 'counter') {
-        const counter = new prometheus.Counter({
-            name: name,
-            help: help || 'Help empty',
-            labelNames
-        });
+        let counter = prometheus.register.getSingleMetric(name);
+        if (!counter) {
+            counter = new prometheus.Counter({
+                name: name,
+                help: help || 'Help empty',
+                labelNames
+            });
+        }
         counter.labels(...labelValues).inc(value || 1);
     } else if (type === 'gauge') {
-        const gauge = new prometheus.Gauge({
-            name: name,
-            help: help || 'Help empty',
-            labelNames
-        });
+        let gauge = prometheus.register.getSingleMetric(name);
+        if (!gauge) {
+            gauge = new prometheus.Gauge({
+                name: name,
+                help: help || 'Help empty',
+                labelNames
+            });
+        }
         gauge.labels(...labelValues).set(value || 0);
     } else if (type === 'histogram') {
-        const histogram = new prometheus.Histogram({
-            name: name,
-            help: help || 'Help empty',
-            labelNames,
-            buckets: [0.1, 1, 5, 10]
-        });
+        let histogram = prometheus.register.getSingleMetric(name);
+        if (!histogram) {
+            histogram = new prometheus.Histogram({
+                name: name,
+                help: help || 'Help empty',
+                labelNames,
+                buckets: [0.1, 1, 5, 10]
+            });
+        }
         histogram.labels(...labelValues).observe(value || 0);
     } else if (type === 'summary') {
-        const summary = new prometheus.Summary({
-            name: name,
-            help: help || 'Help empty',
-            labelNames
-        });
+        let summary  = prometheus.register.getSingleMetric(name);
+        if (!summary) {
+            summary = new prometheus.Summary({
+                name: name,
+                help: help || 'Help empty',
+                labelNames
+            });
+        }
         summary.labels(...labelValues).observe(value || 0);
     }
 }
